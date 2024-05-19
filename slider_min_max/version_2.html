@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.slidecontainer {
+  width: 100%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  border-radius: 5px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #04AA6D;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<h1>Round Range Slider</h1>
+
+<div class="slidecontainer">
+  <input type="range" min="1" max="100" value="50" step="1" class="slider" id="myRange">
+  <p> <b>Value: </b><span id="demo"></span></p>
+</div>
+
+<p> In this example the step is done by datetime</p>
+<li>go through data and steps per day not per date </li>
+
+
+<div id="container"> </div>
+
+<script>
+// data
+var words = [{"_id":"65ca95a3e627ff806ae19a13","added":"2024-02-11T23:03:15.415000","definition":"wegoz","term":"eal","to_be_repeated":true},
+            {"_id":"65ca99cadbe888b920cc642b","added":"2024-02-11T23:20:58.472000","definition":"kaczka","term":"duck","to_be_repeated":false},
+            {"_id":"65d7c1197009620d289cb9c5","added":"2024-02-22T22:48:09.604000","definition":"czekolada","term":"chocolate ","to_be_repeated":false},
+            {"_id":"65da0ca8f54d2daac647c038","added":"2024-02-01T16:35:04.148000","definition":"wrażliwy","term":"vulnerable","to_be_repeated":false},
+            {"_id":"66000d30fda0e49a1a974321","added":"2024-03-24T12:23:28.116000","definition":"potulny","term":"meek","to_be_repeated":false},
+            {"_id":"66000d30fda0e49a1a9744421","added":"2024-03-24T12:23:28.116000","definition":"potulny","term":"meek1","to_be_repeated":false},
+            {"_id":"66000d30fda0e49323974321","added":"2024-03-06T12:23:28.116000","definition":"potulny","term":"meek2","to_be_repeated":false},
+            {"_id":"66000d30fda222974321","added":"2024-03-27T12:23:28.116000","definition":"potulny","term":"meek3","to_be_repeated":false},
+            {"_id":"66000d30fda0e4666a974321","added":"2024-03-01T12:23:28.116000","definition":"potulny","term":"meek4","to_be_repeated":false}]
+// adds elements to document
+words.forEach((element) => {
+	let container = document.getElementById('container')
+	let p = document.createElement("p");
+	p.innerHTML = element.term +' - '+  element.definition + '__ ' + new Date(element.added).toDateString();
+    p.setAttribute("id", "term_"+element._id);
+    p.style.display = 'block';
+	container.append(p);
+
+});
+
+const options = {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric'
+};
+
+
+// function to get max and min from given JSON with words
+function getMaxMinDatesSteps(words) {
+	var date_max;
+	var date_min;
+	var dates = [];
+	for (let i = 0; i < words.length; i++) {
+		var element = words[i];
+        // if date not in dates add it
+        var date = new Date(element.added).toDateString();
+        if (!dates.includes(date)) {
+            dates.push(date);
+        };
+  
+		if(i == 0){
+			date_max = new Date(element.added);
+			date_min = new Date(element.added);
+			continue;
+		};
+		if (new Date(element.added) > date_max) {
+			date_max = new Date(element.added)
+		};
+		if (new Date(element.added) < date_min) {
+			date_min = new Date(element.added)
+		};
+	};
+	return { date_min, date_max, dates };
+};
+
+function updateValue(value) {
+    document.getElementById("demo").innerHTML = new Date(dates[value]).toLocaleString('en-GB', options).replace(',', '');
+};
+
+
+
+
+// sort words by added date 
+words.sort((a, b) => new Date(a.added) - new Date(b.added));
+
+// get MIN Date, Max Date, DATES
+var { date_min, date_max, dates } = getMaxMinDatesSteps(words);
+
+// add attributes to the slider
+var slider = document.getElementById("myRange");
+slider.setAttribute('min', 0);
+slider.setAttribute('max', dates.length - 1);
+slider.setAttribute('value', dates.length - 1);
+
+updateValue(slider.value);
+
+slider.oninput = function() {
+	updateValue(slider.value);
+    
+    var max_added = new Date(dates[slider.value]);
+    max_added.setHours(23);
+    max_added.setMinutes(59);
+    max_added.setSeconds(59);
+    max_added.setMilliseconds(0);
+    words.forEach((element) => {
+        var added = new Date(element.added)
+        if( added >  max_added) {
+            console.log()
+            document.getElementById('term_'+element._id).style.display = 'none';
+        } else {
+            document.getElementById('term_'+element._id).style.display = 'block';
+        }
+    })
+    
+};
+
+console.log(dates)
+
+</script>
+
+</body>
+</html>
