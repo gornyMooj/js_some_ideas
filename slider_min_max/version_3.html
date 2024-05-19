@@ -47,13 +47,16 @@
 <h1>Round Range Slider</h1>
 
 <div class="slidecontainer">
-  <input type="range" min="1" max="100" value="50" step="1" class="slider" id="myRange">
-  <p> <b>Value: </b><span id="demo"></span></p>
+  <input type="range" min="1" max="100" value="50" step="1" class="slider" id="minRange">
+  <p> <b>Value Min: </b><span id="value_min"></span></p>
+  <input type="range" min="1" max="100" value="50" step="1" class="slider" id="maxRange">
+  <p> <b>Value Max: </b><span id="value_max"></span></p>
 </div>
 
 <p> In this example the step is done by datetime</p>
 <li>go through data and steps per day not per date </li>
-
+<br>
+<hr>
 
 <div id="container"> </div>
 
@@ -114,8 +117,8 @@ function getMaxMinDatesSteps(words) {
 	return { date_min, date_max, dates };
 };
 
-function updateValue(value) {
-    document.getElementById("demo").innerHTML = new Date(dates[value]).toLocaleString('en-GB', options).replace(',', '');
+function updateValue(value, id) {
+    document.getElementById(id).innerHTML = new Date(dates[value]).toLocaleString('en-GB', options).replace(',', '');
 };
 
 
@@ -127,35 +130,73 @@ words.sort((a, b) => new Date(a.added) - new Date(b.added));
 // get MIN Date, Max Date, DATES
 var { date_min, date_max, dates } = getMaxMinDatesSteps(words);
 
-// add attributes to the slider
-var slider = document.getElementById("myRange");
-slider.setAttribute('min', 0);
-slider.setAttribute('max', dates.length - 1);
-slider.setAttribute('value', dates.length - 1);
+// add attributes to the MAX SLIDER
+var slider_max = document.getElementById("maxRange");
+slider_max.setAttribute('min', 0);
+slider_max.setAttribute('max', dates.length - 1);
+slider_max.setAttribute('value', dates.length - 1);
+// adding attributes to the MIN SLIDER
+var slider_min = document.getElementById("minRange");
+slider_min.setAttribute('min', 0);
+slider_min.setAttribute('max', dates.length - 1);
+slider_min.setAttribute('value',0);
 
-updateValue(slider.value);
+updateValue(slider_max.value,'value_max');
+updateValue(slider_min.value,'value_min');
 
-slider.oninput = function() {
-	updateValue(slider.value);
-    
-    var max_added = new Date(dates[slider.value]);
+function addTime() {
+    var max_added = new Date(dates[slider_max.value]);
     max_added.setHours(23);
     max_added.setMinutes(59);
     max_added.setSeconds(59);
     max_added.setMilliseconds(0);
+    return max_added;
+};
+
+slider_min.oninput = function() {
+  // makes sure that the slider doesnt go above max 
+  if ( slider_min.value > slider_max.value ) {
+       slider_min.value = slider_max.value;
+    };
+  updateValue(slider_min.value,'value_min');
+  var min_added = new Date(dates[slider_min.value]);
+  var max_added = addTime()
+  words.forEach((element) => {
+        var added = new Date(element.added)
+        if( added <  min_added || added > max_added) {
+            document.getElementById('term_'+element._id).style.display = 'none';
+        } else {
+            document.getElementById('term_'+element._id).style.display = 'block';
+        }
+    });
+
+};
+
+
+
+slider_max.oninput = function() {
+    // makes sure that the slider doesnt go below min 
+    if (slider_max.value < slider_min.value) {
+        slider_max.value = slider_min.value;
+    };
+	  updateValue(slider_max.value,'value_max');
+    var min_added = new Date(dates[slider_min.value]);
+    var max_added = addTime()
     words.forEach((element) => {
         var added = new Date(element.added)
-        if( added >  max_added) {
+        if( added <  min_added || added > max_added) {
             console.log()
             document.getElementById('term_'+element._id).style.display = 'none';
         } else {
             document.getElementById('term_'+element._id).style.display = 'block';
         }
-    })
+    });
     
 };
 
-console.log(dates)
+
+
+
 
 </script>
 
