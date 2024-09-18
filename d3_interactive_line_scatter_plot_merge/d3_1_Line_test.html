@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<head>
+
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+        <style type="text/css">
+		#myplot {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+        svg{
+            border: 1px solid gray;
+        }
+        </style>
+	
+	
+</head>
+
+
+<body>
+
+	<div id="myplot"></div>
+
+</body>
+
+<script>
+	var data = [
+		{ date: 1, value: 1 },
+		{ date: 2, value: 3 },
+		{ date: 3, value: 4 },
+		{ date: 4, value: 3 },
+		{ date: 5, value: 5 }
+		];
+
+	var width = 500;
+	var height = 500;
+	var svg = d3.select("#myplot").append("svg")
+		.attr("width", width)
+		.attr("height", height)
+		
+
+	var line = d3.line()
+		.x(d => x(d.date))
+		.y(d => y(d.value));
+		
+	
+    
+	 var x = d3.scaleLinear()
+		.domain(d3.extent(data, function (d) { return d.date })) // d3.extent returns [min,max]
+		.range([0, width]);
+       
+	var y = d3.scaleLinear()
+		.domain(d3.extent(data, function (d) { return d.value }))
+		.range([height, 0]);
+		
+	var lineGroup = svg.append("g")
+		.append("path")
+        .data([data])
+        .attr("fill", "none")
+        .attr("stroke", "red")
+        .attr("d", line);
+	
+		
+		
+</script>

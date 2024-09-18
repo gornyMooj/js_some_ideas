@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<head>
+
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+        <style type="text/css">
+		#container {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+		#svgs-container {
+			display:flex;
+			flex-direction: row;
+			marin: 0 auto;
+			width:100%;
+			
+		}
+        svg{
+            border: 1px solid gray;
+        }
+        </style>
+	
+	
+</head>
+
+
+<body>
+
+	<div id="container">
+		<p> Click the pink box to draw a circle on the graph.
+		</p>
+		<div id="svgs-container">
+			<div id="myplot"></div>
+			<div id="board"></div>
+		</div>
+	
+	</div>
+
+</body>
+
+<script>
+
+
+	var width = 150;
+	var height = 500;
+	
+	var data = [
+		{ x: 0, y: 0 },
+		{ x: 0, y: height}
+		];
+	
+	var myplot = d3.select("#myplot").append("svg")
+		.attr("width", width)
+		.attr("height", height);
+		
+	 var x = d3.scaleLinear()
+		.domain([0, width]) // d3.extent returns [min,max] function (d) { return d.x }
+		.range([0, width]);
+       
+	var y = d3.scaleLinear()
+		.domain([height, 0])
+		.range([height, 0]);
+		
+	
+	var board = d3.select("#board").append("svg")
+		.attr("width", width)
+		.attr("height", height)
+		.style("background-color", "rgba(255, 51, 153, .2)");
+	
+
+	// Create axes
+	function range(start, stop, step) {
+		return Array.from({ length: Math.ceil((stop - start) / step) }, (v, i) => start + i * step);
+	};	
+	myplot.append("g")
+		.attr("class", "x-axis")
+		.call(d3.axisBottom(x).tickValues(range(0, width, 25)));
+		
+	myplot.append("g")
+		.attr("class", "y-axis")
+		.call(d3.axisRight(y).tickValues(range(0, height, 50)));
+		
+	console.log(range(0, 500, 50));
+		
+	// events
+	board.on("mouseenter", function() {
+		d3.select(this).style("cursor", "pointer");
+	});
+	board.on("mouseout", function() {
+		d3.select(this).style("cursor", "default");
+	});
+	board.on("click", function(event) {
+		const [x, y] = d3.pointer(event);
+		data.push({x:x, y:y});
+		data.sort((a, b) => d3.ascending(a.y, b.y)); // sort data
+		updateChart(data);
+    });
+	
+	function updateChart(newData) {
+		const circles = myplot.selectAll("circle")
+			.data(newData);
+						
+		circles.enter()
+			.append("circle")
+			.attr("r", 5)
+			.attr("fill", "steelblue")
+			.merge(circles)
+			.attr("cx", d => x(d.x))
+			.attr("cy", d => y(d.y));
+		//no need to change domain - this needs to be hardcoded	
+		//y.domain(d3.extent(newData, function (d) { return d.y }));
+		//x.domain(d3.extent(data, function (d) { return d.x }));
+		
+	};
+	data.sort((a, b) => d3.ascending(a.y, b.y)); // sort data
+	updateChart(data);
+	
+
+	
+
+		
+</script>
